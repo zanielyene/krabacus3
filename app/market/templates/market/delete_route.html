@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+{% load static %}
+{% load waffle_tags %}
+
+{% block title %}Delete Trading Route Confirmation{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+
+
+{% block content %}
+<h2>Are you sure you want to delete {{route}}?</h2>
+<form action="{% url 'market:route-delete' route.pk %}" method="post">
+    {% csrf_token %}
+<button type="submit" class="btn btn-danger">Yes, delete this route</button>
+</form>
+
+{% endblock %}
+
+
+{% block footer %}
+{% endblock %}

@@ -1,0 +1,21 @@
+{% load get_news_notification_count %}
+
+{% if request.user.is_authenticated %}
+    <a href="{% url 'notifications:updates' %}" id="view-krabacus-news-has-notifications-authed">
+        <span class="badge badge-primary">
+        {% with notification_count=request.user|get_news_notification_count %}
+        {% if notification_count %}
+            Updates <span class="badge badge-danger">{{notification_count}}</span>
+        {% else %}
+            Updates
+        {% endif %}
+        {% endwith %}
+        </span>
+    </a>
+{% else %}
+    <a href="{% url 'notifications:updates' %}" id="view-krabacus-news-has-notifications-not-authed">
+        <span class="badge badge-primary">
+        Updates
+        </span>
+    </a>
+{% endif %}

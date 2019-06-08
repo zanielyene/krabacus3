@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+{% load static %}
+{% load waffle_tags %}
+
+{% block title %}Trading Routes{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block content %}
+
+
+<nav>
+  <ul class="nav nav-tabs" style="" id="overviewTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true" aria-expanded="true">Help</a>
+      </li>
+      {% if request.user.subscription.active %}
+      <li class="nav-item">
+        <a class="nav-link" id="nav-orders-tab" data-toggle="tab" href="#nav-orders" role="tab" aria-controls="nav-orders" aria-selected="false" onclick="orders_loader();">Active Orders</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="nav-orders-transactions" data-toggle="tab" href="#nav-transactions" role="tab" aria-controls="nav-transactions" aria-selected="false" onclick="transactions_loader();">Route Transactions</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="nav-profit-tab" data-toggle="tab" href="#nav-profit" role="tab" aria-controls="nav-profit" aria-selected="false" onclick="profit_loader();">Profit Analysis</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="nav-eye-transactions" data-toggle="tab" href="#nav-eye" role="tab" aria-controls="nav-eye" aria-selected="false" onclick="eye_of_krab_loader();">Eye of the Krab</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="nav-shopping-tab" data-toggle="tab" href="#nav-shopping" role="tab" aria-controls="nav-shopping" aria-selected="false" onclick="shoppinglist_loader();">Shopping List</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="nav-eye-config" data-toggle="tab" href="#nav-config" role="tab" aria-controls="nav-config" aria-selected="false">Route Configuration</a>
+      </li>
+      {% endif %}
+
+  </ul>
+</nav>
+
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade active in show" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+        <div class="card">
+            <div class="card-body">
+        {% if request.user.subscription.active %}
+        <br>
+            These tables contain all of the information you need to scout & manage your trading route.
+        <br>
+            Here's some helpful information about each tab and how to use them.
+        <h5><b>Active Orders Tab</b></h5>
+            <img src="{% static 'img/activeorders.jpg' %}" style="float:right;" hspace="50px">
+            <ul>
+                <li>Contains a list of orders that '{{route.destination_character}}' has posted inside '{{route.destination_structure}}'.</li>
+                <li>If someone undercuts one of your orders, a value will show up in the "New Price" column for that order. That new price is the lowest order on the market minus 0.01 ISK.</li>
+                <li>When you want to update your order, all you have to do is click the value in the New Price column for the order, press Ctrl-C, and the new price will be copied into your clipboard. </li>
+                <li>The Ctrl-C keybind will also move the selection cursor down by 1 row. This is useful for updating many orders very quickly. </li>
+                <li>Note that even though the values in the New Price column are rounded, the prices that end up copied into your clipboard are exact.</li>
+                <li>If someone undercuts you by a large amount, it may become no longer profitable for you to undercut the market. Orders that are not profitable to be undercut will have their entire row's text set to red.</li>
+            </ul>
+        </p>
+        <p style="clear:right;">
+            <h5><b>Route Transactions Tab</b></h5>
+            <img src="{% static 'img/transactions.jpg' %}" style="float:right;" hspace="50px">
+            <ul>
+                <li>Shows a list of all the sell transactions associated with this trading route. Useful for obtaining a quick glance at how your trading route is doing and whether you need to import additional items.</li>
+                <li>If one of your market orders is fully fulfilled (ie: you sold everything), an (EXHAUSTED) tag will show up next to the item name. Helpful for knowing when to post or import more of an item. </li>
+                <li>The little green plus mark next to your transactions can be used to add an item to your shopping list. </li>
+            </ul>
+        </p>
+
+        <p style="clear:right;">
+            <h5><b>Profit Analysis Tab</b></h5>
+            <img src="{% static 'img/profit.jpg' %}" style="float:right;" hspace="50px">
+            <ul>
+                <li>Provides a list of items you've sold in the past 30 days and how much ISK you've made off them. </li>
+                <li>Profit is calculated based off the price you purchased the item at with '{{route.source_character}}' in the structure '{{route.source_structure}}', and the price you sold the item at with '{{route.destination_character}}' in the structure '{{route.destination_structure}}'.</li>
+                <li>Items that were bought or sold under any circumstance other than that listed above will not have profit calculated.</li>
+                <li>If you purchased an item more than 30 days before you began using Krabacus, profit cannot be calculated for the sale of that item.</li>
+                <br>
+                <li>The total profit indicator is great for measuring your epeen. Will probably add graphs eventually.</li>
+            </ul>
+        </p>
+        <p style="clear:right;">
+            <h5><b>Eye of the Krab Tab</b></h5>
+            <img src="{% static 'img/eyeofkrab.jpg' %}" style="float:right;" hspace="50px">
+            <ul>
+                <li>Used for scouting out new items to import. Calculates how profitable items are to import, and provides you with a plethora of extra information that you can use to inform yourself before purchasing.</li>
+                <li>There's a lot of columns that may be a bit confusing to new traders - mouse over the column header to get a description of what the column means.</li>
+                <li>Data that is either missing or does not exist will say "None". IE: If there is no Tritanium posted on the market in '{{route.destination_structure}}', its "Destination Sell" price will be None.</li>
+            </ul>
+        </p>
+        <p style="clear:right;">
+            <h5><b>Shopping List Tab</b></h5>
+            <img src="{% static 'img/shoppinglist.jpg' %}" style="float:right;" hspace="50px">
+            <ul>
+                <li>All of the items you have added to your shopping list. </li>
+                <li>The "Total Shopping List Cost" is calculated based on '{{route.source_structure}}' sell price.</li>
+            </ul>
+        </p>
+        <p style="clear:right;">
+            <h5><b>Route Configuration Tab</b></h5>
+            I think you can figure this one out yourself, champ.
+        </p>
+        {% else %}
+        You're out of subscription time! Go to Manage Account to see how to add more.
+        {% endif %}
+            </div></div>
+
+    </div>
+  {% if request.user.subscription.active %}
+  <div class="tab-pane fade" id="nav-orders" role="tabpanel" aria-labelledby="nav-orders-tab">
+      {% include 'market/orders.html' %}
+  </div>
+  <div class="tab-pane fade" id="nav-transactions" role="tabpanel" aria-labelledby="nav-transactions-tab">
+      {% include 'market/transactions.html' %}
+  </div>
+
+  <div class="tab-pane fade" id="nav-profit" role="tabpanel" aria-labelledby="nav-profit-tab">
+      {% include 'market/profit_tracker.html' %}
+  </div>
+  <div class="tab-pane fade" id="nav-eye" role="tabpanel" aria-labelledby="nav-eye-tab">
+      {% include 'market/eye_of_the_krab.html' %}
+  </div>
+  <div class="tab-pane fade" id="nav-shopping" role="tabpanel" aria-labelledby="nav-shopping-tab">
+      {% include 'market/shopping_list.html' %}
+  </div>
+  <div class="tab-pane fade" id="nav-config" role="tabpanel" aria-labelledby="nav-config-tab">
+      {% include 'market/route_configuration.html' %}
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+
+{% block footer %}
+{% csrf_token %}
+<script>
+
+
+
+
+$('#overviewTab a').click(function(e) {
+    e.preventDefault();
+  $(this).tab('show');
+});
+
+// store the currently selected tab in the hash value
+$("ul.nav-tabs > li > a").on("shown.bs.tab", function(e) {
+  var id = $(e.target).attr("href").substr(1);
+  window.location.hash = "k" + id;
+});
+
+var hash = window.location.hash;
+$('#overviewTab a[href="' + hash + '"]').tab('show');
+$(document).ready ( function(){
+    selector = $('#overviewTab a[href="#' + hash.substring(2) + '"]')[0];
+    //selector.onclick();
+    selector.click();
+})
+
+// setup global ajax
+var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+</script>
+<link href="/static/admin/css/vendor/select2/select2.css" type="text/css" media="screen" rel="stylesheet">
+<link href="/static/admin/css/autocomplete.css" type="text/css" media="screen" rel="stylesheet">
+<link href="/static/autocomplete_light/select2.css" type="text/css" media="screen" rel="stylesheet">
+<script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>
+<script type="text/javascript" src="/static/autocomplete_light/jquery.init.js"></script>
+<script type="text/javascript" src="/static/admin/js/vendor/select2/select2.full.js"></script>
+<script type="text/javascript" src="/static/autocomplete_light/autocomplete.init.js"></script>
+<script type="text/javascript" src="/static/autocomplete_light/forward.js"></script>
+<script type="text/javascript" src="/static/autocomplete_light/select2.js"></script>
+<script type="text/javascript" src="/static/autocomplete_light/jquery.post-setup.js"></script>
+{% endblock %}

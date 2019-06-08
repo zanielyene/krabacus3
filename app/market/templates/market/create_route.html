@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+{% load static %}
+{% load waffle_tags %}
+
+{% block title %}Create New Trading Route{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+<div class="card">
+<div class="card-body">
+<h3>Create Trading Route</h3>
+A Trading Route defines where you buy stuff, where you sell stuff, and what characters you do your buying/selling with. <br>
+By providing this information, Krabacus can calculate how much profit you're making, how profitable it is to import items, and provide guidance on 0.01 ISK'ing the rest of the market.<br>
+</div>
+</div>
+  <br>
+
+<div id="app">
+
+<form action="{% url 'market:create-route' %}" method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.source.errors }}
+    {{ form.source }}
+
+    <div class="card">
+      <div class="card-body">
+        <h5>Buying Location Information (AKA Source Information)</h5>
+        Enter the character you'll be <b>buying</b> stuff with & the structure you'll be buying stuff in. <br>
+        You must enter your buying character before the structure autocomplete will work.<br>
+        Note: You must always use your buying character to purchase items for profit tracking to work.
+      <table>
+
+      <tr>
+        <th>{{ form.source_character.label_tag }}</th>
+        <td>
+          {{ form.source_character.errors }}
+          {{ form.source_character }}
+
+          <a href="{% url 'sso:esi-add-key' %}" target="_blank"><img src="{% static 'key_button.png' %}"></a>
+        </td>
+      </tr>
+
+      <tr>
+        <th>{{ form.source_structure.label_tag }}</th>
+        <td>
+          {{ form.source_structure.errors }}
+          <select name="source_structure" data-minimum-input-length="3" data-autocomplete-minimum-characters="3" data-placeholder="autocomplete is slow, bear with me" required id="id_source_structure" data-autocomplete-light-language="en-US" data-autocomplete-light-url="/eve/structure_autocomplete/" data-autocomplete-light-function="select2">
+            <option value="" selected>---------</option>
+            <option value="60003760">Jita IV - Moon 4 - Caldari Navy Assembly Plant</option>
+            <option value="60008494">Amarr VIII (Oris) - Emperor Family Academy</option>
+
+          </select><div style="display:none" class="dal-forward-conf" id="dal-forward-conf-for-id_source_structure"><script type="text/dal-forward-conf">[{"type": "field", "src": "source_character", "dst": "character"}]</script></div>
+          <button class="btn btn-secondary btn-sm" type=button onclick="set_source_to_jita();">Use Jita</button>
+          <button class="btn btn-secondary btn-sm" type=button onclick="set_source_to_amarr();">Use Amarr</button>
+        </td>
+      </tr>
+    </table>
+      </div>
+    </div>
+
+  <hr>
+
+      <div class="card">
+      <div class="card-body">
+        <h5>Selling Location Information (AKA Destination Information)</h5>
+        Enter the character you'll be <b>selling</b> stuff with & the structure you plan to sell things in.<br>
+        You must enter your seller character before the structure autocomplete will work.<br>
+        Note: You must always sell things with your seller character in order for profit tracking to work. If you have multiple characters you sell things with, create multiple routes.
+    <table>
+      <tr>
+        <th>{{ form.destination_character.label_tag }}</th>
+        <td>
+          {{ form.destination_character.errors }}
+          {{ form.destination_character }}
+          <a href="{% url 'sso:esi-add-key' %}" target="_blank"><img src="{% static 'key_button.png' %}"></a>
+        </td>
+      </tr>
+
+      <tr>
+        <th>{{ form.destination_structure.label_tag }}</th>
+        <td>
+          {{ form.destination_structure.errors }}
+          <select name="destination_structure" data-minimum-input-length="3" data-autocomplete-minimum-characters="3" data-placeholder="autocomplete is slow, bear with me" required id="id_destination_structure" data-autocomplete-light-language="en-US" data-autocomplete-light-url="/eve/structure_autocomplete/" data-autocomplete-light-function="select2">
+            <option value="" selected>---------</option>
+            <option value="60003760">Jita IV - Moon 4 - Caldari Navy Assembly Plant</option>
+            <option value="60008494">Amarr VIII (Oris) - Emperor Family Academy</option>
+
+          </select><div style="display:none" class="dal-forward-conf" id="dal-forward-conf-for-id_destination_structure"><script type="text/dal-forward-conf">[{"type": "field", "src": "destination_character", "dst": "character"}]</script></div>
+
+          <button class="btn btn-secondary btn-sm" type=button onclick="set_dest_to_jita();">Use Jita</button>
+          <button class="btn btn-secondary btn-sm" type=button onclick="set_dest_to_amarr();">Use Amarr</button>
+        </td>
+        <td>
+
+        </td>
+      </tr>
+
+  </table>
+      </div></div>
+
+  <hr>
+
+    <div class="card">
+      <div class="card-body">
+        <h5>Other Route Information/Overhead</h5>
+        In order to accurately calculate how profitable items are, Krabacus needs to know how much it costs to ship items and how much it costs for you to post items on the destination market.<br>
+        If you don't know the destination structure's sales tax/broker fee, you can just leave the defaults until you can figure it out.
+    <table>
+
+      <tr>
+        <th>Shipping Cost per m3</th>
+        <td>
+          {{ form.price_per_m3.errors }}
+            <div class="input-group mb-3">
+              <input  id="id_price_per_m3" value="{{form.price_per_m3.value}}" type="number" name="price_per_m3" step="any" required="" id="id_price_per_m3" class="form-control" placeholder="1000" >
+              <div class="input-group-append">
+                <span class="input-group-text">ISK/m3</span>
+              </div>
+            </div>
+        </td>
+      </tr>
+
+      <tr>
+        <th>Shipping Collateral Cost</th>
+        <td>
+          {{ form.collateral_pct.errors }}
+            <div class="input-group mb-3">
+              <input  type="number" value="{{form.collateral_pct.value}}" name="collateral_pct" step="any" required="" id="id_collateral_pct" class="form-control" placeholder="1.00" >
+              <div class="input-group-append">
+                <span class="input-group-text">% of Collateral</span>
+              </div>
+            </div>
+        </td>
+      </tr>
+
+
+      <tr>
+        <th>Destination Structure Sales Tax</th>
+        <td>
+          {{ form.sales_tax.errors }}
+            <div class="input-group mb-3">
+              <input  type="number" value="{{form.sales_tax.value}}" name="sales_tax" step="any" required="" id="id_sales_tax" class="form-control">
+              <div class="input-group-append">
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+        </td>
+      </tr>
+
+      <tr>
+        <th>Destination Structure Broker Fee</th>
+        <td>
+          {{ form.broker_fee.errors }}
+            <div class="input-group mb-3">
+              <input  type="number" value="{{form.broker_fee.value}}" name="broker_fee" step="any" required="" id="id_broker_fee" class="form-control">
+              <div class="input-group-append">
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+        </td>
+      </tr>
+    </table>
+      </div>
+    </div>
+  <br>
+    <div class="card">
+      <div class="card-body">
+  <button type="submit" class="btn btn-lg btn-success btn-block">Create Trading Route</button>
+      </div>
+    </div>
+</form>
+    </div>
+{% endblock %}
+
+
+{% block footer %}
+<script>
+  //spent 2 hours trying to do this 'correctly', i'm over it now and will settle with the hack
+  function set_source_to_jita(){
+    $("select[name^='source_structure']").select().val('60003760');
+    $("#select2-id_source_structure-container")[0].innerText = "Jita IV - Moon 4 - Caldari Navy Assembly Plant"
+    $("select[name^='source_structure']").select().trigger('change'); /// im pretty sure this doesnt do anything
+  };
+
+  function set_source_to_amarr(){
+    $("select[name^='source_structure']").select().val('60008494');
+    $("#select2-id_source_structure-container")[0].innerText = "Amarr VIII (Oris) - Emperor Family Academy"
+    $("select[name^='source_structure']").select().trigger('change'); /// im pretty sure this doesnt do anything
+  };
+  
+  function set_dest_to_jita(){
+    $("select[name^='destination_structure']").select().val('60003760');
+    $("#select2-id_destination_structure-container")[0].innerText = "Jita IV - Moon 4 - Caldari Navy Assembly Plant"
+    $("select[name^='destination_structure']").select().trigger('change'); /// im pretty sure this doesnt do anything
+  };
+
+  function set_dest_to_amarr(){
+    $("select[name^='destination_structure']").select().val('60008494');
+    $("#select2-id_destination_structure-container")[0].innerText = "Amarr VIII (Oris) - Emperor Family Academy"
+    $("select[name^='destination_structure']").select().trigger('change'); /// im pretty sure this doesnt do anything
+  };
+
+
+function create_route_post(event) {
+  gtag('event', 'click', {
+    'event_label' : 'Create Route Button'
+  });
+  };
+
+
+</script>
+{{form.media}}
+{% endblock %}

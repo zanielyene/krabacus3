@@ -1,0 +1,30 @@
+
+{% load bootstrap4 %}
+{% block title %}Login{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Login</h1>
+</div>
+
+<form method="post" action="{% url 'login' %}">
+    <input type="hidden" name="next" value="{{ next }}" />
+<fieldset>
+  {% bootstrap_form_errors form %}
+    {% bootstrap_field form.username %}
+    {% bootstrap_field form.password %}
+
+  <div class="row">
+    <div class="col-md-8">
+
+    </div>
+    <div class="col-md-4">
+      <input type="submit" value="Login" class="btn btn-primary pull-right"/>
+    </div>
+  </div>
+  <input type="hidden" name="next" value="{{ next }}" />
+  {% csrf_token %}
+</fieldset>
+</form>
+
+{% endblock %}

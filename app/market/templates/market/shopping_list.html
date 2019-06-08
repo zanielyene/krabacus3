@@ -1,0 +1,226 @@
+{% load fmt_isk %}
+{% load fmt_int %}
+{% load fmt_float %}
+{% load fmt_timedelta %}
+
+<div class="modal fade" id="shopShoppinglistModal" tabindex="-1" role="dialog" aria-labelledby="shopShoppinglistModal" aria-hidden="true">
+<form>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add <span id="shop-shopping-modal-item-name">ITEMNAME</span> to shopping list</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group row">
+            <div class="col" style="padding-right:0;">
+              <input type="number" class="form-control" id="shop-add-shopping-list-modal-item-quantity" tabindex="-1" placeholder="enter quantity">
+            </div>
+            <div class="col" style="padding-left:7px;padding-top:7px">
+              * <span id="shop-shopping-price-each">???</span> ISK/each = <span id="shop-shopping-list-price-total">???</span> ISK
+            </div>
+          </div>
+        </form>
+      </div>
+      <input type="hidden" id="shop-add-shopping-list-type-id" name="shop-add-shopping-list-type-id">
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+        <button type="submit" value="submit" class="btn btn-primary" id="shop-add-shopping-list-save-button">Save</button>
+
+      </div>
+    </div>
+  </div>
+</form>
+</div>
+
+
+<div class="alert alert-info"  style="display:none;" role="alert">
+</div>
+
+
+<button class="btn btn-sm btn-primary" onclick="copy_evepraisal();">Copy Evepraisal/Multibuy to clipboard</button>
+<span style="font-size:14px;" class="badge badge-secondary">
+Total Shopping List Cost: ~<span id="purchase-price">N/A</span>
+</span>
+<button id="shopping-list-clear-button" class="btn btn-sm btn-danger">Clear Shopping List</button>
+<table class="table table-striped table-bordered" id="table-shoppinglist">
+<thead>
+<tr>
+
+</tr>
+    {% for field in shoppinglist_fields %}
+        <th title="{{field}}">{{field}}</th>
+    {% endfor %}
+
+</thead>
+    <tbody>
+    </tbody>
+
+</table>
+
+<script>
+
+var name_col = 0;
+var quantity_col = 1;
+var price_col = 2;
+var tot_price_col = 3;
+var object_id_col = 4;
+
+$(function () {
+  $('#table-shoppinglist').DataTable({
+    searching: false,
+    pageLength: 200,
+    processing: true,
+    serverSide: true,
+    order: [[ 0, "desc" ]],
+    deferLoading: 0,
+    lengthChange: false,
+    ajax: "{% url 'market:shopping-list-data' route.pk %}",
+    columnDefs: [
+            {
+                "render": function ( data, type, row ) {return "x " + fmt_quantity_small(data);},
+                "targets": quantity_col
+            },
+            {
+                "render": function ( data, type, row ) {return fmt_isk(data);},
+                "targets": price_col
+            },
+            {
+                "render": function ( data, type, row ) {return fmt_isk(data);},
+                "targets": tot_price_col
+            },
+            { "visible": false,  "targets": [object_id_col] }
+        ],
+    drawCallback: function () {
+          var api = this.api();
+          var sum = 0;
+          var d = api.column( tot_price_col, {page:'current'} ).data();
+          for(var s=0; s<d.length; s++){
+            sum += d[s];
+          }
+          $("#purchase-price").text(fmt_isk(sum) + " ISK");
+
+        },
+        rowCallback: function(row, data, index){
+            // format name column w/ shopping list link
+            button_html = '<button type="button" id="shop-add-shopping-list-'+data[object_id_col]+'" style="padding:0;" class="btn btn-link" data-toggle="modal" data-target="#shopShoppinglistModal" data-shoppinglistqty='+data[quantity_col]+'  data-typename="'+data[name_col]+'"data-typeid='+data[object_id_col]+'>(Edit)</button> ';
+            $(row).find('td:eq('+name_col+')').html(button_html + data[name_col]);
+
+            $(row).find('td:eq('+quantity_col+')').html("<span id='shop-add-shopping-list-qty-" + data[object_id_col] + "'>" + data[quantity_col] + "</span>");
+
+        },
+  });
+  //set up modal
+    $('#shopShoppinglistModal').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget) // Button that triggered the modal
+
+      var shopping_list_qty = button.data('shoppinglistqty')
+      var typename = button.data('typename')
+      var typeid = button.data('typeid')
+
+      $('#shop-shopping-modal-item-name').text(typename);
+      if(shopping_list_qty === 0){
+        $('#shop-add-shopping-list-modal-item-quantity').val(null);
+      }
+      else{
+        $('#shop-add-shopping-list-modal-item-quantity').val(shopping_list_qty);
+      }
+
+      $('#shop-add-shopping-list-type-id').val(typeid);
+      shop_on_modal_quantity_change();
+    })
+
+    $('#shopShoppinglistModal').on('shown.bs.modal', function (event) {
+        $('#shop-add-shopping-list-modal-item-quantity').focus();
+    })
+
+  //set up modal ajax
+    $("#shop-add-shopping-list-save-button").click(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'market:edit-shopping-list' route.pk %}",
+            data: {
+                object_id: $('#shop-add-shopping-list-type-id').attr('value'),
+                qty: $('#shop-add-shopping-list-modal-item-quantity').val(),
+            },
+            success: function(result) {
+                qty= $('#shop-add-shopping-list-modal-item-quantity').val();
+                obj_id = $('#shop-add-shopping-list-type-id').val();
+                dt = $('#table-shoppinglist').dataTable();
+                row_id = dt.fnFindCellRowIndexes(obj_id, object_id_col);
+                dt.api().cell(row_id, quantity_col).data(qty).draw(false);
+                $('#shopShoppinglistModal').modal('hide');
+            },
+            error: function(result) {
+                obj_id=$('#shop-add-shopping-list-type-id').attr('value')
+                $('#shop-add-shopping-list-' + obj_id).text("(ERROR)")
+                $('#shop-add-shopping-list-' + obj_id).css('color', 'red');
+                $('#shopShoppinglistModal').modal('hide');
+            }
+        });
+  });
+
+  //set up clear shopping list ajax
+    $("#shopping-list-clear-button").click(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'market:clear-shopping-list' route.pk %}",
+            success: function(result) {
+                location.reload();
+            },
+            error: function(result) {
+            }
+        });
+  });
+  })
+
+
+//update modal quantities on input change
+function shop_on_modal_quantity_change(){
+    qty = $('#shop-add-shopping-list-modal-item-quantity').val();
+    if(qty === null){
+      qty = 0;
+    }
+
+    obj_id = $("#shop-add-shopping-list-type-id").attr('value');
+
+    // find price in table
+    dt = $('#table-shoppinglist').dataTable();
+    row_id = dt.fnFindCellRowIndexes(obj_id, object_id_col);
+    price = dt.api().cell(row_id, price_col).data()
+    total = price * qty;
+
+    $('#shop-shopping-price-each').text(fmt_isk(price));
+    $('#shop-shopping-list-price-total').text(fmt_isk(total));
+}
+
+$('#shop-add-shopping-list-modal-item-quantity').on('input', shop_on_modal_quantity_change);
+
+
+function shoppinglist_loader(event){
+    $('#table-shoppinglist').DataTable().draw();
+};
+
+function copy_evepraisal(event){
+    api = $('#table-shoppinglist').DataTable();
+
+    var names = api.column( name_col, {page:'current'} ).data();
+    var quantities = api.column( quantity_col, {page:'current'} ).data();
+
+    var copy_text = "";
+
+    for (i = 0; i < names.length; ++i) {
+        copy_text += names[i] + " " + quantities[i] + "\n";
+    }
+    navigator.clipboard.writeText(copy_text);
+
+    $('.alert').text("Evepraisal/Multi-buy copied to clipboard");
+    $('.alert').show();
+};
+</script>

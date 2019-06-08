@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+{% load static %}
+{% load waffle_tags %}
+
+{% block title %}News & Updates{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+
+
+{% block content %}
+  <div class="container">
+<div class="card">
+
+  <div class="card-body">
+        <h3>News & Updates</h3>
+
+      {% for update in updates %}
+            <div class="container">
+            <div class="card bg-secondary {% if update.pk in updates_read %}border-secondary{% else %}border-success{% endif %}">
+              <div class="card-body">
+                  <h5 class="card-title">{% if update.pk in updates_read %}{% else %}<span class="badge badge-success">New!</span>{% endif %} {{update.subject}} </h5>
+                <h6 class="card-subtitle mb-2 text-muted">Posted {{update.post_time}}</h6>
+                <p class="card-text">
+                    {% autoescape off %}{{update.message}}{% endautoescape %}
+                </p>
+              </div>
+            </div>
+            </div>
+        <br>
+
+      {% endfor %}
+  </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+{% block footer %}
+{% endblock %}

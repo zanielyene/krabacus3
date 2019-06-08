@@ -1,0 +1,100 @@
+{% load fmt_timedelta %}
+        <div class="card">
+            <div class="card-body">
+<form action="{% url 'market:route-edit' %}" method="post">
+    {% csrf_token %}
+    {{ edit_route_form.non_field_errors }}
+    {{ edit_route_form.source.errors }}
+    {{ edit_route_form.source }}
+    {{edit_route_form.route}}
+    <table>
+        <tr>
+            <Td>
+                Shipping Cost per m3
+            </Td>
+            <td>
+            <div class="input-group mb-3">
+              <input  id="id_price_per_m3" value="{{edit_route_form.price_per_m3.value}}" type="number" name="price_per_m3" step="any" required="" id="id_price_per_m3" class="form-control" >
+              <div class="input-group-append">
+                <span class="input-group-text">ISK/m3</span>
+              </div>
+            </div>
+            </td>
+        </tr>
+        <tr>
+            <Td>
+                Shipping Collateral Cost
+            </Td>
+            <td>
+            <div class="input-group mb-3">
+              <input  id="id_collateral_pct" value="{{edit_route_form.collateral_pct.value}}" type="number" name="collateral_pct" step="any" required="" id="id_collateral_pct" class="form-control" >
+              <div class="input-group-append">
+                <span class="input-group-text">% of Collateral</span>
+              </div>
+            </div>
+            </td>
+        </tr>
+        <tr>
+            <Td>
+                Destination Structure Sales Tax
+            </Td>
+            <td>
+            <div class="input-group mb-3">
+              <input  type="number" value="{{edit_route_form.sales_tax.value}}" name="sales_tax" step="any" required="" id="id_sales_tax" class="form-control">
+              <div class="input-group-append">
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+            </td>
+        </tr>
+        <tr>
+            <Td>
+                Destination Structure Broker Fee
+            </Td>
+            <td>
+            <div class="input-group mb-3">
+              <input  type="number" value="{{edit_route_form.broker_fee.value}}" name="broker_fee" step="any" required="" id="id_broker_fee" class="form-control">
+              <div class="input-group-append">
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Colorblind Mode
+            </td>
+            <td>
+                {{edit_route_form.colorblind}}
+            </td>
+        </tr>
+    </table>
+<button type="submit" class="btn btn-lg btn-success">Save</button>
+</form>
+            </div>
+        </div>
+<br>
+
+
+        <div class="card">
+            <div class="card-body">
+<b>{{route.source_structure.name}}</b> Market orders & price information last updated: <b>{{source_market_data_scan.scan_start|fmt_timedelta}}</b>  (Target interval: every 10 minutes) <br>
+<b>{{route.destination_structure.name}}</b> Market orders & price information last updated: <b>{{dest_market_data_scan.scan_start|fmt_timedelta}}</b> (Target interval: every 10 minutes) <br>
+<br>
+<b>{{route.destination_structure.location.region.name}}</b> Market history last updated: <b>{{market_history_scan.scan_start|fmt_timedelta}}</b> (Target interval: every 24 hours) <br>
+<br>
+<b>{{route.source_character.name}}'s</b> Transactions last updated: <b>{{source_char_transactions_scan.scan_start|fmt_timedelta}}</b> (Target Interval: every 60 minutes)<br>
+<br>
+<b>{{route.destination_character.name}}'s</b> Transactions last updated: <b>{{dest_char_transactions_scan.scan_start|fmt_timedelta}}</b> (Target Interval: every 60 minutes)<br>
+<b>{{route.destination_character.name}}'s</b> Orders last updated: <b>{{dest_char_orders_scan.scan_start|fmt_timedelta}}</b> (Target Interval: every 60 minutes)<br>
+<br>
+            </div>
+        </div>
+<br>
+        <div class="card">
+            <div class="card-body">
+<form action="{% url 'market:route-delete' route.pk %}" method="get">
+<button type="submit" class="btn btn-sm btn-danger">Delete Route</button>
+</form>
+            </div>
+        </div>

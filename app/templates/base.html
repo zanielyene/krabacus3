@@ -1,0 +1,153 @@
+{% load installed %}
+{% load bootstrap4 %}
+{% load static %}
+{% load waffle_tags %}
+{% load sub_time_remaining_fmt %}
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-W5W3BLP');
+
+{% if request.user.is_authenticated %}
+  var user_id = "{{request.user.pk}}";
+{% endif %}
+</script>
+<!-- End Google Tag Manager -->
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <!--
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-72787057-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-72787057-2');
+    {% if request.user.is_authenticated %}
+      gtag('set', {'user_id': '{{request.user.pk}}'});
+    {% endif %}
+  </script>
+  -->
+  <title>Krabacus - {% block title %}{% endblock %}</title>
+
+  {% bootstrap_css %}
+  {% bootstrap_javascript jquery='full' %}
+  <link rel="stylesheet" href="{% static 'css/krabacus-css.css' %}">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.18/b-1.5.4/b-html5-1.5.4/cr-1.5.0/fh-3.1.4/kt-2.5.0/sl-1.2.6/datatables.min.css"/>
+
+  {% block header %}{% endblock %}
+</head>
+
+<body id="bootstrap-override"style="background-image: url('{% static '/img/krabacusbackground.jpg' %}');">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W5W3BLP"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light" style="padding-top:0;padding-bottom:0;">
+  <a class="navbar-brand" href="/" style="padding-top:0px;padding-bottom:0px;">Krabacus</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+    {% if request.user.is_authenticated %}
+      <li class="nav-item">
+        <a id="my_routes_link" class="nav-link" style="padding-bottom:0px;padding-top:0px;" href="/">My Routes</a>
+      </li>
+      <li class="nav-item">
+        <a id="manage_account_link" class="nav-link" style="padding-bottom:0px;padding-top:0px;" href="{% url 'sso:account' %}">Manage Account</a>
+      </li> 
+      {% if request.user.is_staff %}
+      <li class="nav-item"><a class="nav-link" style="padding-bottom:0px;padding-top:0px;" href="{% url 'sso:analytics' %}">Analytics</a></li>
+      <li class="nav-item"><a class="nav-link" style="padding-bottom:0px;padding-top:0px;" href="/admin/">Admin</a></li>
+      {% endif %}
+      <li class="nav-item"><a  id="logout_link" class="nav-link" style="padding-bottom:0px;padding-top:0px;" href="{% url 'logout' %}">Logout</a></li>
+
+      {% if route.creator %}
+      <li class="nav-item" style="padding-left:50px;">Currently Viewing Route: {{route}} ({{route.source_character}} -> {{route.destination_character}})</li>
+      {% elif route %}
+      <li class="nav-item" style="padding-left:50px;">Currently Viewing Route: DEMO IMPORTING ROUTE (Buying in Jita, selling in D-PY)</li>
+      {% endif %}
+    {% elif route %}
+      <li class="nav-item" style="padding-left:50px;">Currently Viewing Route: DEMO IMPORTING ROUTE (Buying in Jita, selling in D-PY)</li>
+    {% endif %}
+
+      <!--
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Dropdown
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="#">Action</a>
+          <a class="dropdown-item" href="#">Another action</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Something else here</a>
+        </div>
+      </li>
+      -->
+
+    </ul>
+    <span class="navbar-text" style="padding-top:0px;">
+      <h5 style="padding-top:8px;padding-left:8px;">
+        {% include 'notifications/notification_button.html' %}
+      </h5>
+    </span>
+    {% if request.user.is_authenticated %}
+      <span class="navbar-text" style="padding-top:0px;">
+        <h5 style="padding-top:8px;padding-left:8px;"><a id="add_sub_time_header" href="{% url 'sso:subscribe' %}"><span class="badge badge-success">Add Subscription Time</span></a></h5>
+      </span>
+      <span class="navbar-text" style="padding-top:0px;">
+        <h5 style="padding-top:8px;padding-left:8px;"><a id="sub_time_indicator_header" href="{% url 'sso:subscribe' %}"><span class="badge badge-secondary">Subscription Time Remaining: {{ request.user.subscription.time_remaining_hours | sub_time_remaining_fmt }}</span></a></h5>
+      </span>
+
+
+
+    {% endif %}
+    <!--
+    <form class="form-inline my-2 my-lg-0">
+      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </form>
+    -->
+  </div>
+</nav>
+<br>
+
+<div class="container-fluid">
+  <div class="content">
+    {% bootstrap_messages %}
+    {% block content %}{% endblock %}
+  </div>
+  <br>
+</div>
+
+
+
+<link rel="stylesheet" href="{% static 'css/select2-bootstrap4.css' %}">
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.18/b-1.5.4/b-html5-1.5.4/cr-1.5.0/fh-3.1.4/kt-2.5.0/sl-1.2.6/datatables.min.js"></script>
+<script src="{% static 'js/fnfindrowcellindex.js' %}"></script>
+<script src="{% static 'js/humanize.js' %}"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.11/js/dataTables.bootstrap.min.js"></script>-->
+{% block footer %}
+
+
+{% endblock %}
+<hr>
+<div class="card" style="opacity:0.95">
+
+  <div class="card-body">
+    <span>
+      Krabacus - <a href="https://docs.google.com/forms/d/e/1FAIpQLSfW6-lEevP0kpH7sLUUwiMF_edJIeenLyRvjAnHYC1R6a5UxA/viewform">Submit Feedback</a> - Brought to you by Zanielyene
+
+    </span>
+  </div>
+</div>
+</body>
+
+</html>

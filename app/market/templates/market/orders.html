@@ -1,0 +1,266 @@
+{% load fmt_isk %}
+{% load fmt_int %}
+{% load fmt_float %}
+{% load fmt_timedelta %}
+
+<div class="alert alert-info"  style="display:none;" role="alert">
+</div>
+
+<table class="table table-striped table-bordered" id="table-orders">
+<thead>
+<tr>
+
+</tr>
+    {% for field in order_fields %}
+        <th title="{{field}}">{{field}}</th>
+    {% endfor %}
+
+</thead>
+    <tbody>
+    </tbody>
+
+</table>
+
+<div class="modal fade" id="ordersShoppinglistModal" tabindex="-1" role="dialog" aria-labelledby="ordersShoppinglistModal" aria-hidden="true">
+<form>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="orders-shopping-modal-item-name">Add ITEMNAME to shopping list</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group row">
+            <div class="col" style="padding-right:0;">
+              <input type="number" class="form-control" id="orders-add-shopping-list-modal-item-quantity" tabindex="-1" placeholder="enter quantity">
+            </div>
+            <div class="col" style="padding-left:7px;padding-top:7px">
+              * <span id="orders-shopping-price-each">???</span> ISK/each = <span id="orders-shopping-list-price-total">???</span> ISK
+            </div>
+          </div>
+        </form>
+      </div>
+      <input type="hidden" id="orders-add-shopping-list-type-id" name="orders-add-shopping-list-type-id">
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+        <button type="submit" value="submit" class="btn btn-primary" id="orders-add-shopping-list-save-button">Save</button>
+
+      </div>
+    </div>
+  </div>
+</form>
+</div>
+
+<p>Prices last updated {{source_market_data_scan.scan_start|fmt_timedelta}}</p>
+
+<script>
+    var orders_table = null;
+    var loaded_once = false;
+
+    var orders_name_column = 0;
+    var new_price_col = 2;
+    var proportion_remain_col = 8;
+    var undercut_severity_col = 4;
+    var order_price_col = 3;
+    var breakeven_col = 5;
+    var orders_object_id_col = 9;
+    var orders_source_sell_price = 10
+    var orders_shopping_list_qty_col = 11;
+
+    $( document ).ready(function(){
+    $(function () {
+      orders_table = $('#table-orders').DataTable({
+        searching: false,
+        pageLength: 300,
+        processing: true,
+        rowId: 'Item Type',
+        select: true,
+        serverSide: true,
+        order: [[ 0, "asc" ]],
+        deferLoading: 0,
+        lengthChange: false,
+        ajax: "{% url 'market:order-data' route.pk %}",
+        rowCallback: function(row, data, index){
+            if(data[new_price_col] != "N/A"){
+                if(data[new_price_col] <= data[breakeven_col]){
+                {% if route.colorblind %}
+                    $(row).css('color', 'gray');
+                {% else %}
+                    $(row).css('color', 'red');
+                {% endif %}
+                }
+                else{
+                  {% if route.colorblind %}
+                    $(row).find('td:eq('+new_price_col+')').css('color', 'gray');
+                  {% else %}
+                    $(row).find('td:eq('+new_price_col+')').css('color', 'red');
+                  {% endif %}
+                }
+            }
+            // format name column w/ shopping list link
+            if(data[orders_shopping_list_qty_col] === 0){
+                // create new shopping list entry
+                button_html = '<button type="button" id="orders-add-shopping-list-'+data[orders_object_id_col]+'" style="padding:0;" class="btn btn-link" data-toggle="modal" data-target="#ordersShoppinglistModal" data-shoppinglistqty=0  data-typename="'+data[orders_name_column]+'"data-typeid='+data[orders_object_id_col]+'>(+)</button> ';
+                $(row).find('td:eq('+orders_name_column+')').html(button_html + data[orders_name_column]);
+            }
+            else{
+                // create edit shopping list entry
+
+                button_html = '<button style="color:yellow;padding:0;" type="button" id="orders-add-shopping-list-'+data[orders_object_id_col]+'" class="btn btn-link" data-toggle="modal" data-target="#ordersShoppinglistModal" data-shoppinglistqty='+data[orders_shopping_list_qty_col]+' data-typename="'+data[orders_name_column]+'"data-typeid='+data[orders_object_id_col]+'>(x'+data[orders_shopping_list_qty_col]+')</button> ';
+                $(row).find('td:eq('+orders_name_column+')').html(button_html + data[orders_name_column]);
+            }
+            },
+        columnDefs: [
+                {
+                    "render": function ( data, type, row ) {
+                        if (data === 0){return "";}
+                        else { return fmt_quantity_small(data) + "%";}
+                        },
+                    "targets": undercut_severity_col
+                },
+                {
+                    "render": function ( data, type, row ) {return fmt_isk(data);},
+                    "targets": new_price_col
+                },
+                {
+                    "render": function ( data, type, row ) {return fmt_quantity_small(data) + "%";},
+                    "targets": proportion_remain_col
+                },
+                {
+                    "render": function ( data, type, row ) {return fmt_isk(data);},
+                    "targets": order_price_col
+                },
+                {
+                    "render": function ( data, type, row ) {return fmt_isk(data);},
+                    "targets": breakeven_col
+                },
+                { "visible": false,  "targets": [orders_object_id_col, orders_source_sell_price, orders_shopping_list_qty_col] }
+            ]
+      });
+      orders_table.select.items('cell');
+      orders_table.select.selector('td:nth-child(3)');
+
+      orders_table.on( 'processing', function () {
+            orders_table.cell(function ( idx, data, node ) {if (idx.row === 0 && idx.column === 2){return true;}else{return false;}}).select();} );
+      });
+
+      //set up modal
+        $('#ordersShoppinglistModal').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget) // Button that triggered the modal
+
+          var shopping_list_qty = button.data('shoppinglistqty')
+          var typename = button.data('typename')
+          var typeid = button.data('typeid')
+
+          $('#orders-shopping-modal-item-name').text("Add " + typename + " to shopping list");
+          if(shopping_list_qty === 0){
+            $('#orders-add-shopping-list-modal-item-quantity').val(null);
+          }
+          else{
+            $('#orders-add-shopping-list-modal-item-quantity').val(shopping_list_qty);
+          }
+
+          $('#orders-add-shopping-list-type-id').val(typeid);
+          orders_on_modal_quantity_change();
+        })
+
+        $('#ordersShoppinglistModal').on('shown.bs.modal', function (event) {
+        $('#orders-add-shopping-list-modal-item-quantity').focus();
+        })
+
+          //set up modal ajax
+            $("#orders-add-shopping-list-save-button").click(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'market:edit-shopping-list' route.pk %}",
+                    data: {
+                        object_id: $('#orders-add-shopping-list-type-id').attr('value'),
+                        qty: $('#orders-add-shopping-list-modal-item-quantity').val(),
+                    },
+                    success: function(result) {
+                        obj_id=$('#orders-add-shopping-list-type-id').attr('value')
+                        qty=$('#orders-add-shopping-list-modal-item-quantity').val();
+                        $('#orders-add-shopping-list-' + obj_id).text("(x" +qty+ ")")
+                        $('#orders-add-shopping-list-' + obj_id).css('color', 'yellow');
+                        $('#ordersShoppinglistModal').modal('hide');
+                    },
+                    error: function(result) {
+                        obj_id=$('#orders-add-shopping-list-type-id').attr('value')
+                        $('#orders-add-shopping-list-' + obj_id).text("(ERROR)")
+                        $('#orders-add-shopping-list-' + obj_id).css('color', 'red');
+                        $('#ordersShoppinglistModal').modal('hide');
+                    }
+                });
+            });
+      });
+
+
+
+    //update modal quantities on input change
+    function orders_on_modal_quantity_change(){
+        qty = $('#orders-add-shopping-list-modal-item-quantity').val();
+        if(qty === null){
+          qty = 0;
+        }
+
+        obj_id = $("#orders-add-shopping-list-type-id").attr('value');
+
+        // find price in table
+        dt = $('#table-orders').dataTable();
+        row_id = dt.fnFindCellRowIndexes(obj_id, orders_object_id_col);
+        price = dt.api().cell(row_id, orders_source_sell_price).data()
+        total = price * qty;
+
+        $('#orders-shopping-price-each').text(fmt_isk(price));
+        $('#orders-shopping-list-price-total').text(fmt_isk(total));
+    }
+
+    $('#orders-add-shopping-list-modal-item-quantity').on('input', orders_on_modal_quantity_change);
+
+
+
+    document.onkeydown = check_key_orders;
+
+    function check_key_orders(e) {
+        if ($('#table-orders').is(":visible")){
+            e = e || window.event;
+
+            if (e.keyCode == '67' && event.ctrlKey) {
+                selected = orders_table.cell({selected:true});
+                new_price = selected.data();
+                row = selected.index().row;
+                object_name_cell = orders_table.cell(function ( idx, data, node ) {if (idx.row === row && idx.column === 0){return true;}else{return false;}});
+
+                $('.alert').text("Copied " + new_price + " into clipboard for updating order of " + object_name_cell.data());
+                $('.alert').show();
+                navigator.clipboard.writeText(new_price);
+                selected.deselect();
+                new_cell_selected = orders_table.cell(function ( idx, data, node ) {if (idx.row === row+1 && idx.column === 2){return true;}else{return false;}}).select();
+            }
+        }
+    }
+
+    function orders_loader(event){
+        $(document).ready ( function(){
+            //var data = orders_table.rows().select();
+            //
+            if(!loaded_once){
+                orders_table.draw();
+                //orders_table.ajax.reload();
+                loaded_once = true;
+                var data = orders_table.cells().select();
+            }
+            //var data = orders_table.cells().select();
+            //var data = orders_table.cells().select();
+            //alert(orders_table.cell(':eq(0)', null, {page: 'current'} ).toString());
+            // set selected cell
+            // allow copy interception
+        });
+    };
+
+</script>

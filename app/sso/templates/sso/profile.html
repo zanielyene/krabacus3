@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+{% load static %}
+{% load waffle_tags %}
+
+{% block title %}Home{% endblock %}
+
+{% block css %}
+    <style type="text/css">
+        .profilebox {
+            padding: 0px;
+        }
+        .profilebox h3 {
+            margin-top: 5px;
+        }
+        .profilebox hr {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border-top: 1px solid darkgray;
+        }
+        .keytable th {
+            text-align: right;
+        }
+        .keytable td {
+            padding-left: 10px;
+        }
+
+    </style>
+{% endblock %}
+
+
+
+{% block content %}
+{% if user.is_authenticated %}
+
+<div class="card">
+  <div class="card-body">
+        <h3>Trading Routes</h3>
+        {% for route in routes %}
+        <a href="{% url 'market:route-view' route.pk %}">{{route}} ({{route.source_character}} -> {{route.destination_character}})</a>
+        <br>
+        {% endfor %}
+
+        <a id="create-trade-route-repeat" href="{% url 'market:create-route' %}">Create new trading route</a>
+  </div>
+</div>
+
+
+{% else %}
+
+<br>
+<div class="card" style="background-color:rgba(48, 48, 48, 0.95);">
+  <div class="card-body">
+
+      <div class="row">
+        <div class="col-1">
+        </div>
+        <div class="col-10">
+            <h3 style="text-align:center;">Your importing game is about to change forever.</h3>
+            <h5 style="text-align:center;">Tired of the 0.01 ISK game?</h5>
+            <h5 style="text-align:center;">Do you want to eat a bullet every time you have to edit your market spreadsheet?</h5>
+            <h5 style="text-align:center;">Ever wonder how much ISK you're really making from importing?</h5>
+            <h5 style="text-align:center;">Do you want your balance sheet to look like this?</h5>
+            <span><img style="display:block;margin: 0 auto;" src="{% static 'img/route_performance.png' %}"></span><br>
+            <div style="display:block; margin: 0 auto;text-align:center;">
+                <img style="display:inline" src="{% static 'img/krabright.png' %}"><span style="display:inline;font-size:1.5rem;" > Start making billions with Krabacus </span><img  style="display:inline;"  src="{% static 'img/krableft.png' %}">
+            </div>
+
+            <a id="log-in-from-index-top" href="{% url 'sso:esi-login' %}"><img  style="display:block;margin: 0 auto;" src="{% static 'eve_sso_red.png' %}"></a>
+            <br>
+            <Br>
+            <span  style="display:block; margin: 0 auto;text-align:center;">
+                <a id="view-demo" href="{% url 'market:route-demo-view' %}"><h1><B>I'm not convinced, show me the demo</B></h1></a></span>
+            </span>
+            <h4 style="text-align:center;">~~Features~~</h4>
+            <span  style="display:block; margin: 0 auto;text-align:center;">
+                <h5>Automatic profit tracking</h5>
+                <h5>0.01 ISK helper tool</h5>
+                <h5>Scope out new markets with Eye of the Krab</h5>
+                <h5>Shopping list with multibuy support</h5>
+                <h5>Get notified when you sell out of an item</h5>
+                <h5>Calculate accurate profit margins (including frieght and listing taxes!)</h5>
+                <h5>Shows you breakeven price so you never accidentially sell at a loss</h5>
+                <h5>Create multiple trade routes for different trade hubs</h5>
+                <h5>View all of your market orders at a glance with tons of statistics</h5>
+                <h5>View how profitable your past sales have been.</h5>
+                <h5><span style="text-decoration:line-through;">Assets integration so you don't overimport stuff</span> (in progress cut me some slack)</h5>
+                <br>
+                <a id="log-in-from-index-bot" href="{% url 'sso:esi-login' %}"><img  style="display:block;margin: 0 auto;" src="{% static 'eve_sso_red.png' %}"></a>
+            <br>
+            </span>
+        </div>
+          <div class="col-1">
+        </div>
+      </div>
+  </div>
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

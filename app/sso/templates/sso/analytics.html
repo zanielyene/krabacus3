@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+{% load static %}
+{% load waffle_tags %}
+{% load fmt_isk %}
+
+{% block title %}Manage Account{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+
+{% block content %}
+<br>
+<div class="card">
+  <div class="card-body">
+        <h5>Users with no routes</h5>
+        <table class="table table-bordered">
+            <tr>
+                <td>
+                    User id
+                </td>
+                <td>
+                    username
+                </td>
+                <td>
+                    first logged in
+                </td>
+                <td>
+                    last logged in
+                </td>
+
+                <td>
+                    # of chars with full esi keys
+                </td>
+            </tr>
+            {% for u in users_with_no_routes %}
+            <tr>
+                <td>{{u.user.pk}}</td>
+                <td>{{u.user.username}}</td>
+                <td>{{u.user.date_joined}}</td>
+                <td>{{u.user.last_login}}</td>
+                <td>{{u.num_keys}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+      <h5>Users with routes</h5>
+        <table class="table table-bordered">
+            <tr>
+                <td>
+                    User id
+                </td>
+                <td>
+                    username
+                </td>
+                <td>
+                    first logged in
+                </td>
+                <td>
+                    last logged in
+                </td>
+
+                <td>
+                    # of routes
+                </td>
+                <td>
+                    Most recent route viewed
+                </td>
+                <td>Most recent view time</td>
+            </tr>
+            {% for u in users_with_routes %}
+            <tr>
+                <td>{{u.user.pk}}</td>
+                <td>{{u.user.username}}</td>
+                <td>{{u.user.date_joined}}</td>
+                <td>{{u.user.last_login}}</td>
+                <td>{{u.num_routes}}</td>
+                <td>{% if u.most_recent_viewed %}<a href="{% url 'market:route-view' u.most_recent_viewed.pk %}">{{u.most_recent_viewed}}</a> {% else %}{{u.most_recent_viewed}}{% endif %}</td>
+                <td>{{u.most_recent_view_time}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+  </div>
+</div>
+
+
+<br>
+{% endblock %}
+
+
+{% block footer %}
+{% endblock %}

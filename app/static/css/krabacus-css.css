@@ -1,0 +1,140 @@
+#bootstrap-override th {
+    padding-top:4px;
+    padding-bottom:4px;
+    padding-left:4px;
+    padding-right:30px;
+}
+
+#bootstrap-override td {
+    padding-top:4px;
+    padding-bottom:4px;
+    padding-left:4px;
+    padding-left:4px;
+}
+
+#table-eye-of-krab > tbody > tr > td > button {
+    font-family:arial;
+    font-size:12px;
+    vertical-align: baseline;
+    line-height: normal;
+}
+
+#table-shoppinglist > tbody > tr > td > button {
+    font-family:arial;
+    font-size:12px;
+    vertical-align: baseline;
+    line-height: normal;
+}
+
+#table-orders > tbody > tr > td > button {
+    font-family:arial;
+    font-size:12px;
+    vertical-align: baseline;
+    line-height: normal;
+}
+
+#table-transactions > tbody > tr > td > button {
+    font-family:arial;
+    font-size:12px;
+    vertical-align: baseline;
+    line-height: normal;
+}
+
+
+#bootstrap-override table {
+    font-family:arial;
+    font-size:12px;
+}
+
+#bootstrap-override p {
+    padding: 2px;
+    margin: 0;
+    font-family:arial;
+    font-size:12px;
+}
+
+
+.table-striped tbody tr:nth-of-type(even){
+    background-color:#222;
+
+}
+
+.table-striped th{
+    background-color:#222;
+
+}
+
+
+.nav-item {
+    background-color:#303030;
+
+}
+#table-orders_info {
+    color: white;
+}
+
+#table-orders_previous{
+    color: white !important;
+}
+
+#table-orders_next{
+    color: white !important;
+}
+
+
+#table-transactions_info {
+    color: white;
+}
+
+#table-transactions_previous{
+    color: white !important;
+}
+
+#table-transactions_next{
+    color: white !important;
+}
+#table-transactions_paginate > span > a:not(:first-child){
+    color: white !important;
+}
+
+
+#table-eye-of-krab_info {
+    color: white;
+}
+
+#table-eye-of-krab_previous{
+    color: white !important;
+}
+
+#table-eye-of-krab_next{
+    color: white !important;
+}
+#table-eye-of-krab_paginate > span > a:not(:first-child){
+    color: white !important;
+}
+
+
+#table-shoppinglist_info {
+    color: white;
+}
+#table-shoppinglist_previous{
+    color: white !important;
+}
+
+#table-shoppinglist_next{
+    color: white !important;
+}
+
+
+#table-profit-tracker_info {
+    color: white;
+}
+#table-profit-tracker_previous{
+    color: white !important;
+}
+#table-profit-tracker_next{
+    color: white !important;
+}
+#table-profit-tracker_paginate > span > a:not(:first-child){
+    color: white !important;
+}

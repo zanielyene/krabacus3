@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+{% load static %}
+{% load waffle_tags %}
+
+{% block title %}Trading Routes{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+        Routes:<br>
+        {% for route in routes %}
+        <a href="{% url 'market:route-view' route.pk %}">{{route}} ({{route.source_character}} -> {{route.destination_character}})</a>
+        <br>
+        {% endfor %}
+
+        <a href="{% url 'market:create-route' %}">Create new trading route</a>
+  </div>
+</div>
+{% endblock %}
+
+
+
+
+{% block footer %}
+{% endblock %}

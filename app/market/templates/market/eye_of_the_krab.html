@@ -1,0 +1,531 @@
+{% load fmt_isk %}
+{% load fmt_int %}
+{% load fmt_timedelta %}
+{% load fmt_float %}
+{% load static %}
+
+
+<div style="display:flex;">
+  <div class="accordion" id="filtersettings" style="">
+  <div class="card">
+    <div class="card-header" style="padding:0;" id="headingOne">
+        <button class="btn btn-sm" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          Filtering
+        </button>
+    </div>
+    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+      <div class="card-body">
+
+
+    <table>
+      <tr>
+        <td>
+          Dest Volume Posted
+        </td>
+        <td>
+          <select class="form-control form-control-sm" id="filter_dest_volume_posted_comparator">
+            <option></option>
+            <option>&gt;</option>
+            <option>&lt;</option>
+            <option>=</option>
+            <option>&gt;=</option>
+            <option>&lt;=</option>
+          </select>
+        </td>
+        <td>
+         <input type="number" class="form-control form-control-sm" id="filter_dest_volume_posted_value">
+        </td>
+        <td>
+          Units posted
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Dest Region Sell Rate
+        </td>
+        <td>
+          <select class="form-control form-control-sm" id="filter_dest_sell_rate_comparator">
+            <option></option>
+            <option>&gt;</option>
+            <option>&lt;</option>
+            <option>=</option>
+            <option>&gt;=</option>
+            <option>&lt;=</option>
+          </select>
+        </td>
+        <td>
+         <input type="number" class="form-control form-control-sm" id="filter_dest_sell_rate_value">
+        </td>
+        <td>
+          Units per day
+        </td>
+      </tr>
+
+
+     <tr>
+        <td>
+          Depletion Estimate
+        </td>
+        <td>
+          <select class="form-control form-control-sm" id="filter_depletion_est_comparator">
+            <option></option>
+            <option>&gt;</option>
+            <option>&lt;</option>
+            <option>=</option>
+            <option>&gt;=</option>
+            <option>&lt;=</option>
+          </select>
+        </td>
+        <td>
+         <input type="number" class="form-control form-control-sm" id="filter_depletion_est_value">
+        </td>
+        <td>
+          Days until market depletion
+        </td>
+      </tr>
+
+     <tr>
+        <td>
+          Unit Profit
+        </td>
+        <td>
+          <select class="form-control form-control-sm" id="filter_unit_profit_comparator">
+            <option></option>
+            <option>&gt;</option>
+            <option>&lt;</option>
+          </select>
+        </td>
+        <td>
+         <input type="number" class="form-control form-control-sm" id="filter_unit_profit_value">
+        </td>
+        <td>
+          ISK
+        </td>
+      </tr>
+     <tr>
+        <td>
+          Total Cost to Import & List
+        </td>
+        <td>
+          <select class="form-control form-control-sm" id="filter_tcil_comparator">
+            <option></option>
+            <option>&gt;</option>
+            <option>&lt;</option>
+          </select>
+        </td>
+        <td>
+         <input type="number" class="form-control form-control-sm" id="filter_tcil_value">
+        </td>
+        <td>
+          ISK
+        </td>
+      </tr>
+
+     <tr>
+        <td>
+          Return on Investment
+        </td>
+        <td>
+          <select class="form-control form-control-sm" id="filter_cap_eff_comparator">
+            <option></option>
+            <option>&gt;</option>
+            <option>&lt;</option>
+          </select>
+        </td>
+        <td>
+         <input type="number" class="form-control form-control-sm" id="filter_cap_eff_value">
+        </td>
+        <td>
+
+        </td>
+      </tr>
+
+     <tr>
+        <td>
+          Max Potential Profit
+        </td>
+        <td>
+          <select class="form-control form-control-sm" id="filter_max_profit_comparator">
+            <option></option>
+            <option>&gt;</option>
+            <option>&lt;</option>
+          </select>
+        </td>
+        <td>
+         <input type="number" class="form-control form-control-sm" id="filter_max_profit_value">
+        </td>
+        <td>
+          ISK/day
+        </td>
+      </tr>
+    </table>
+        <button id="filter-eye-of-krab-button" class="btn btn-sm btn-info" onclick="execute_eye_of_krab_filter();" disabled>Data not loaded</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="accordion" id="searchsettings" style="">
+  <div class="card">
+    <div class="card-header" style="padding:0;" >
+        <button class="btn btn-sm" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+          Search
+        </button>
+    </div>
+    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+      <div class="card-body">
+
+
+    <table>
+      <tr>
+        <td>
+          Item Name
+        </td>
+        <td>
+          <select name="item_name_eye" data-minimum-input-length="3" data-autocomplete-minimum-characters="3" data-placeholder="Enter an item name" required id="id_item_search" data-autocomplete-light-language="en-US" data-autocomplete-light-url="/eve/object_type_autocomplete/" data-autocomplete-light-function="select2">
+            <option value="" selected>---------</option>
+
+          </select>
+
+        </td>
+      </tr>
+    </table>
+        <button id="search-eye-of-krab-button" class="btn btn-sm btn-info" onclick="execute_eye_of_krab_search();" disabled>Data not loaded</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<table class="table table-striped table-bordered" id="table-eye-of-krab">
+<thead>
+
+
+<tr>
+
+</tr>
+    {% for field in eye_of_krab_fields %}
+        <th title="{{field.help_text}}">{{field.name}}</th>
+    {% endfor %}
+</thead>
+    <tbody>
+    </tbody>
+
+</table>
+
+
+<div class="modal fade" id="eyeShoppinglistModal" tabindex="-1" role="dialog" aria-labelledby="eyeShoppinglistModal" aria-hidden="true">
+<form>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="eye-shopping-modal-item-name">Add ITEMNAME to shopping list</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group row">
+            <div class="col" style="padding-right:0;">
+              <input type="number" class="form-control" id="eye-add-shopping-list-modal-item-quantity" tabindex="-1" placeholder="enter quantity">
+            </div>
+            <div class="col" style="padding-left:7px;padding-top:7px">
+              * <span id="eye-shopping-price-each">???</span> ISK/each = <span id="eye-shopping-list-price-total">???</span> ISK
+            </div>
+          </div>
+        </form>
+      </div>
+      <input type="hidden" id="eye-add-shopping-list-type-id" name="eye-add-shopping-list-type-id">
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+        <button type="submit" value="submit" class="btn btn-primary" id="eye-add-shopping-list-save-button">Save</button>
+
+      </div>
+    </div>
+  </div>
+</form>
+</div>
+<p>Source prices last updated {{dest_market_data_scan.scan_start|fmt_timedelta}} || Dest prices last updated {{source_market_data_scan.scan_start|fmt_timedelta}} || Velocity last updated {{market_history_scan.scan_start|fmt_timedelta}}</p>
+
+<script>
+var eye_name_column = 0;
+var eye_dest_volume_posted_col = 1;
+var eye_dest_velocity_col = 2;
+var eye_dest_depletion_col = 3;
+var eye_dest_sell_col = 4;
+var eye_source_sell_col = 5;
+var eye_freight_col = 6;
+var eye_listing_col = 7;
+var eye_cogs_col = 8;
+var eye_unit_profit_col = 9;
+var eye_capital_efficiency = 10;
+var eye_proj_prof_col = 11;
+var eye_object_id_col = 12;
+var eye_max_item_price_col = 13
+var eye_shopping_list_qty_col = 14;
+
+$(function () {
+  $('#table-eye-of-krab').DataTable({
+    searching: false,
+    pageLength: 50,
+    processing: true,
+    serverSide: true,
+    deferLoading: 0,
+    order: [[ eye_proj_prof_col, "desc" ]],
+    lengthChange: false,
+    select: false,
+    ajax: {
+      "url":"{% url 'market:eye-data' route.pk %}",
+      "data": function(d){
+        d.filter_dest_volume_posted_comparator=$('#filter_dest_volume_posted_comparator option:selected').text();
+        d.filter_dest_volume_posted_value=$('#filter_dest_volume_posted_value')[0].value;
+
+        d.filter_dest_sell_rate_comparator=$('#filter_dest_sell_rate_comparator option:selected').text();
+        d.filter_dest_sell_rate_value=$('#filter_dest_sell_rate_value')[0].value;
+
+        d.filter_depletion_est_comparator=$('#filter_depletion_est_comparator option:selected').text();
+        d.filter_depletion_est_value=$('#filter_depletion_est_value')[0].value;
+
+        d.filter_unit_profit_comparator=$('#filter_unit_profit_comparator option:selected').text();
+        d.filter_unit_profit_value=$('#filter_unit_profit_value')[0].value;
+
+        d.filter_tcil_comparator=$('#filter_tcil_comparator option:selected').text();
+        d.filter_tcil_value=$('#filter_tcil_value')[0].value;
+
+        d.filter_cap_eff_comparator=$('#filter_cap_eff_comparator option:selected').text();
+        d.filter_cap_eff_value=$('#filter_cap_eff_value')[0].value;
+
+        d.filter_max_profit_comparator=$('#filter_max_profit_comparator option:selected').text();
+        d.filter_max_profit_value=$('#filter_max_profit_value')[0].value;
+
+        d.search_term=$('#select2-id_item_search-container').text();
+        }
+    },
+    language: {
+        'processing':'Retrieving table data. This may take up to 5 minutes the first time you use it. PLEASE DONT REFRESH THE PAGE.',
+        'loadingRecords': '&nbsp;',
+        },
+    rowCallback: function(row, data, index){
+        eye_dest_depletion_col_rendered = eye_dest_depletion_col;
+        eye_capital_efficiency_col_rendered = eye_capital_efficiency - 2;
+
+        // format dest depletion column
+        if(data[eye_dest_depletion_col] != "None"){
+            if( data[eye_dest_depletion_col] <= 1.0){
+            {% if route.colorblind %}
+              $(row).find('td:eq('+eye_dest_depletion_col_rendered+')').css('color', 'gray');
+            {% else %}
+              $(row).find('td:eq('+eye_dest_depletion_col_rendered+')').css('color', 'red');
+            {% endif %}
+            }
+        }
+
+        // format capital efficiency column
+        if(data[eye_capital_efficiency] != "None"){
+            if( data[eye_capital_efficiency] <= 10.0){
+                {% if route.colorblind %}
+                  $(row).find('td:eq('+eye_capital_efficiency_col_rendered+')').css('color', 'gray');
+                {% else %}
+                  $(row).find('td:eq('+eye_capital_efficiency_col_rendered+')').css('color', 'red');
+                {% endif %}
+
+            }
+            if( data[eye_capital_efficiency] > 500.0){
+                {% if route.colorblind %}
+                  $(row).find('td:eq('+eye_capital_efficiency_col_rendered+')').css('color', 'green');
+                {% else %}
+                  $(row).find('td:eq('+eye_capital_efficiency_col_rendered+')').css('color', 'green');
+                {% endif %}
+            }
+
+        }
+
+        //format destination sell price
+        if(data[eye_dest_sell_col] > data[eye_max_item_price_col]){
+            highest_sell = fmt_isk(data[eye_max_item_price_col])
+            warning_html = ' ' + '<a href="#" data-toggle="tooltip" title="This item has NOT sold at or above this price in the past 30 days in this region. Item price may be artifically inflated or just recently stocked for the first time. The highest sell price in the past 30 days is ' + highest_sell + ' ISK."><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="yellow" fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></a>';
+            $(row).find('td:eq('+eye_dest_sell_col+')').html(fmt_isk(data[eye_dest_sell_col]) + warning_html);
+            }
+
+        // format name column w/ shopping list link
+        if(data[eye_shopping_list_qty_col] === 0){
+            // create new shopping list entry
+            button_html = '<button type="button" id="eye-add-shopping-list-'+data[eye_object_id_col]+'" style="padding:0;" class="btn btn-link" data-toggle="modal" data-target="#eyeShoppinglistModal" data-shoppinglistqty=0  data-typename="'+data[eye_name_column]+'"data-typeid='+data[eye_object_id_col]+'>(+)</button> ';
+            $(row).find('td:eq('+eye_name_column+')').html(button_html + data[eye_name_column]);
+        }
+        else{
+            // create edit shopping list entry
+            
+            button_html = '<button style="color:yellow;padding:0;" type="button" id="eye-add-shopping-list-'+data[eye_object_id_col]+'" class="btn btn-link" data-toggle="modal" data-target="#eyeShoppinglistModal" data-shoppinglistqty='+data[eye_shopping_list_qty_col]+' data-typename="'+data[eye_name_column]+'"data-typeid='+data[eye_object_id_col]+'>(x'+data[eye_shopping_list_qty_col]+')</button> ';
+            $(row).find('td:eq('+eye_name_column+')').html(button_html + data[eye_name_column]);
+        }
+        post_eye_of_krab_draw();
+
+        },
+    drawCallback: function( settings ) { },
+    columnDefs: [
+            {
+                "render": function ( data, type, row ) {return data;},
+                "targets": eye_name_column
+            },
+            {
+                "render": function ( data, type, row ) {return fmt_quantity(data) + " units";},
+                "targets": eye_dest_volume_posted_col
+            },
+            {
+                "render": function ( data, type, row ) {return fmt_quantity(data) + " units/day";},
+                "targets": eye_dest_velocity_col
+            },
+            {
+                "render": function ( data, type, row ) {return fmt_quantity(data) + " days";},
+                "targets": eye_dest_depletion_col
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // this never hits because it's overridden by the columndef. just here for documentations sake
+                    return fmt_isk(data);
+                    },
+                "targets": eye_dest_sell_col
+            },
+            {
+                "render": function ( data, type, row ) {return fmt_isk(data);},
+                "targets": eye_source_sell_col
+            },
+            {
+                "render": function ( data, type, row ) {return fmt_isk(data);},
+                "targets": eye_freight_col
+            },
+            {
+                "render": function ( data, type, row ) {return fmt_isk(data);},
+                "targets": eye_listing_col
+            },
+            {
+                "render": function ( data, type, row ) {return fmt_isk(data);},
+                "targets": eye_cogs_col
+            },
+            {
+                "render": function ( data, type, row ) {return fmt_isk(data);},
+                "targets": eye_unit_profit_col
+            },
+            {
+                "render": function ( data, type, row ) {return fmt_isk(data) + " ISK/day";},
+                "targets": eye_proj_prof_col
+            },
+            {
+                "render": function ( data, type, row ) {return Math.trunc(data) + "%";},
+                "targets": eye_capital_efficiency
+            },
+            { "visible": false,  "targets": [
+                eye_shopping_list_qty_col,
+                eye_freight_col,
+                eye_listing_col,
+                eye_max_item_price_col,
+                eye_object_id_col,
+                ] }
+
+        ]
+  });
+
+  //set up modal
+    $('#eyeShoppinglistModal').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget) // Button that triggered the modal
+
+      var shopping_list_qty = button.data('shoppinglistqty')
+      var typename = button.data('typename')
+      var typeid = button.data('typeid')
+
+      $('#eye-shopping-modal-item-name').text("Add " + typename + " to shopping list");
+      if(shopping_list_qty === 0){
+        $('#eye-add-shopping-list-modal-item-quantity').val(null);
+      }
+      else{
+        $('#eye-add-shopping-list-modal-item-quantity').val(shopping_list_qty);
+      }
+
+      $('#eye-add-shopping-list-type-id').val(typeid);
+      eye_on_modal_quantity_change();
+    })
+
+$('#eyeShoppinglistModal').on('shown.bs.modal', function (event) {
+$('#eye-add-shopping-list-modal-item-quantity').focus();
+})
+
+  //set up modal ajax
+    $("#eye-add-shopping-list-save-button").click(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'market:edit-shopping-list' route.pk %}",
+            data: {
+                object_id: $('#eye-add-shopping-list-type-id').attr('value'),
+                qty: $('#eye-add-shopping-list-modal-item-quantity').val(),
+            },
+            success: function(result) {
+                obj_id=$('#eye-add-shopping-list-type-id').attr('value')
+                qty=$('#eye-add-shopping-list-modal-item-quantity').val();
+                $('#eye-add-shopping-list-' + obj_id).text("(x" +qty+ ")")
+                $('#eye-add-shopping-list-' + obj_id).css('color', 'yellow');
+                $('#eyeShoppinglistModal').modal('hide');
+            },
+            error: function(result) {
+                obj_id=$('#eye-add-shopping-list-type-id').attr('value')
+                $('#eye-add-shopping-list-' + obj_id).text("(ERROR)")
+                $('#eye-add-shopping-list-' + obj_id).css('color', 'red');
+                $('#eyeShoppinglistModal').modal('hide');
+            }
+        });
+    });
+  });
+
+
+//update modal quantities on input change
+function eye_on_modal_quantity_change(){
+    qty = $('#eye-add-shopping-list-modal-item-quantity').val();
+    if(qty === null){
+      qty = 0;
+    }
+
+    obj_id = $("#eye-add-shopping-list-type-id").attr('value');
+
+    // find price in table
+    dt = $('#table-eye-of-krab').dataTable();
+    row_id = dt.fnFindCellRowIndexes(obj_id, eye_object_id_col);
+    price = dt.api().cell(row_id, eye_source_sell_col).data()
+    total = price * qty;
+
+    $('#eye-shopping-price-each').text(fmt_isk(price));
+    $('#eye-shopping-list-price-total').text(fmt_isk(total));
+}
+
+$('#eye-add-shopping-list-modal-item-quantity').on('input', eye_on_modal_quantity_change);
+
+function eye_of_krab_loader(event){
+    $('#table-eye-of-krab').DataTable().draw();
+};
+
+function execute_eye_of_krab_filter(){
+  $('#filter-eye-of-krab-button').prop('disabled', true);
+  $('#filter-eye-of-krab-button').text("Applying filter..");
+  $('#search-eye-of-krab-button').prop('disabled', tue);
+  $('#search-eye-of-krab-button').text("Filter being applied..");
+  $('#table-eye-of-krab').DataTable().draw();
+}
+
+function execute_eye_of_krab_search(){
+  $('#filter-eye-of-krab-button').prop('disabled', true);
+  $('#filter-eye-of-krab-button').text("Search being applied..");
+  $('#search-eye-of-krab-button').prop('disabled', true);
+  $('#search-eye-of-krab-button').text("Searching..");
+  $('#table-eye-of-krab').DataTable().draw();
+}
+
+
+function post_eye_of_krab_draw(){
+  $('#filter-eye-of-krab-button').prop('disabled', false);
+  $('#filter-eye-of-krab-button').text("Apply Filter");
+  $('#search-eye-of-krab-button').prop('disabled', false);
+  $('#search-eye-of-krab-button').text("Search");
+}
+
+</script>
