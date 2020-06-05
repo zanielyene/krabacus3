@@ -1,6 +1,6 @@
 colorlog==3.1.4
 confusable-homoglyphs==3.2.0
-Django==2.1.2
+Django==2.2.13
 #-e git+https://github.com/yourlabs/django-autocomplete-light.git@24bff6bafe148ab4ce823ee077f3e62bf80472e3#egg=django_autocomplete_light
 django-autocomplete-light
 django-bootstrap4==0.0.7
